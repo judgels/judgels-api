@@ -69,6 +69,10 @@ tags:
     description: Example echo operations
   - name: User
     description: Operations about user
+  - name: Email
+    description: Operations about email
+  - name: Phone
+    description: Operations about phone
 # Security scheme definitions that can be used across the specification.
 securityDefinitions:
   main_auth: # security definition name (you can name it as you want)
@@ -90,7 +94,137 @@ securityDefinitions:
 # Holds the relative paths to the individual endpoints. The path is appended to the
 # basePath in order to construct the full URL. 
 paths:
-  '/users/{username}': # path parameter in curly braces
+  '/api/users/changePass/{code}':
+    parameters:
+      - name: code
+        in: path
+        description: 'Change password token code'
+        required: true
+        type: string
+    post:
+      tags:
+        - User
+      security:
+        - basic_auth: []
+      summary: Endpoind to change password, link for this endpoint is send via email.
+      parameters:
+        - name: newPassword
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              password:
+                type: string
+                description: new password
+      responses:
+        '200':
+          description: "Success"
+        '400':
+          description: "Invalid change password code"
+  
+  '/api/users/forgotPass':
+    post:
+      tags:
+        - User
+      security:
+        - basic_auth: []
+      summary: Will send forgot password link to user email
+      parameters:
+        - name: forgotDetails
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: username of user
+              email:
+                type: string
+                description: email of user
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Invalid username and email combination
+  
+  '/api/users/info':
+    get:
+      tags:
+        - User
+      summary: Retrieve logged in user;s info
+      security:
+        - basic_auth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserInfo'
+          
+  '/api/users/email':
+    get:
+      tags:
+        - User
+        - Email
+      summary: Retrieve all logged in user's email
+      security:
+        - basic_auth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Email'
+  
+  '/api/users/email/primary':
+    get:
+      tags:
+        - User
+        - Email
+      summary: Retrieve logged in's user's primary email
+      security:
+        - basic_auth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Email'
+  
+  '/api/users/phone':
+    get:
+      tags:
+        - User
+        - Phone
+      summary: Retrieve all logged in user's phone
+      security:
+        - basic_auth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Phone'
+  
+  '/api/users/phone/primary':
+    get:
+      tags:
+        - User
+        - Phone
+      summary: Retrieve logged in's user's primary phone
+      security:
+        - basic_auth: []
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Phone'
+
+  '/users/{username} (dummy)': # path parameter in curly braces
     # documentation for GET operation for this path
     
     # parameters list that are used with each operation for this path
@@ -182,7 +316,7 @@ paths:
         '404':
           description: User not found
   
-  '/echo':
+  '/echo (dummy)':
     post:
       tags:
         - Echo
@@ -221,9 +355,92 @@ paths:
 definitions:
   Email:
     description: User email address
-    type: string
-    format: email
-    example: john.smith@example.com
+    type: object
+    properties:
+      email:
+        description: 'email address'
+        type: string
+        example: john@example.com
+      jid:
+        description: 'email jid'
+        type: string
+        example: JIDUSEEbPMbNG6jKGergDi6QMVt
+      verified:
+        description: 'whether this email is verified'
+        type: integer
+        example: 0
+      primary:
+        description: 'whether this email is primary email'
+        type: boolean
+        example: 1
+  Phone:
+    description: User phone
+    type: object
+    properties:
+      phone:
+        description: 'phone number'
+        type: string
+        example: 0812312315466
+      jid:
+        description: 'phone jid'
+        type: string
+        example: JIDUSEPbPMbNG6jKGergDi6QMVt
+      verified:
+        description: 'whether this phone is verified'
+        type: integer
+        example: 0
+      primary:
+        description: 'whether this phone is primary phone'
+        type: integer
+        example: 1
+  UserInfo:
+    description: User info
+    type: object
+    properties:
+      id:
+        description: User info id (not user id)
+        type: integer
+        example: 54
+      jid:
+        description: User JID
+        type: string
+        example: JIDUSEPbPMbNG6jKGergDi6QMVt
+      gender:
+        description: User gender
+        type: string
+        example: "MALE"
+      birthdate:
+        description: millisecond timestap of birthdate
+        type: integer
+        example: 834105600000
+      streetAddress:
+        description: address of user
+        type: string
+        example: Jl. Anggrek X/21 Semarang Indonesia
+      postalCode:
+        description: postal code
+        type: integer
+        example: 15562
+      institution:
+        description: school or university or company
+        type: string
+        example: Institut Teknologi Bandung
+      city:
+        description: City
+        type: string
+        example: Bandung
+      provinceOrState:
+        description: Province or state of user
+        type: string
+        example: Jawa Barat
+      country:
+        description: "Country of user"
+        type: string
+        example: "Indonesia"
+      shirtSize:
+        description: 'Shirt Size of user'
+        type: string
+        example: "XL"
   User:
     type: object
     properties:
